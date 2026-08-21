@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#181d2a">
+  <title>Contadores D&D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #12151d;
+      --bg-deep-2: #0d0e15;
+      --panel: #efe6cc;
+      --panel-2: #e7dcbc;
+      --ink: #2b2013;
+      --ink-soft: #5b4c36;
+      --gold: #c9a227;
+      --gold-soft: #d4af37;
+      --silver: #adacac;
+      --silver-soft: #c0c0c0;
+      --copper: #a8692e;
+      --copper-soft: #b87333;
+      --moss: #1f5a9e;
+      --moss-dark: #2a364a;
+      --rust: #a24936;
+      --cream: #ede3c8;
+      --velvet: #8f0a0a;
+      --test2: #8a7a57;
+      --line: rgba(43, 32, 19, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top left,
+          rgba(86, 75, 170, .4),
+          transparent 35%),
+        radial-gradient(circle at bottom right,
+          rgba(31, 90, 158, .15),
+          transparent 45%),
+        linear-gradient(180deg,
+          #181d2a 0%,
+          #0d0f17 100%);
+    }
+
+    .sheet {
+      min-height: 100vh;
+      background: none;
+    }
+
+    .wrap {
+      max-width: 880px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      color: var(--cream);
+      padding: 8px 0 22px;
+      position: relative;
+    }
+
+    .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: .85;
+    }
+
+    .name {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: clamp(28px, 5vw, 44px);
+      margin: 6px 0 4px;
+      letter-spacing: .02em;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      font-style: italic;
+      color: var(--panel-2);
+      opacity: .9;
+    }
+
+    .divider {
+      width: 120px;
+      height: 2px;
+      margin: 16px auto 0;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .leafmark {
+      margin-top: 10px;
+      opacity: .9;
+    }
+
+    /* Grid */
+    .grid {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 18px 20px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+    }
+
+    .card+.card {
+      margin-top: 16px;
+    }
+
+    .card-title {
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--moss-dark);
+      margin: 0 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .card-title.treasure {
+      color: var(--gold-soft);
+    }
+
+
+    /* Ability scores */
+    .abilities {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .ability {
+      text-align: center;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      padding: 10px 4px 8px;
+    }
+
+    .ability .lbl {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .1em;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+    }
+
+    .ability .score {
+      font-family: 'Cinzel', serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin: 2px 0 0;
+    }
+
+    .ability .mod {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--moss-dark);
+      font-weight: 600;
+    }
+
+    /* HP tracker */
+    .hp-block {
+      margin-top: 16px;
+      text-align: center;
+      margin-bottom: 16px
+    }
+
+    .hp-numbers {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 12px
+    }
+
+    .hp-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2px solid var(--moss);
+      background: var(--panel);
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .12s ease, background .12s ease;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .hp-btn:hover {
+      background: var(--moss);
+      color: var(--panel);
+      transform: translateY(-1px);
+    }
+
+    .hp-btn:active {
+      transform: translateY(0px) scale(.94);
+    }
+
+    .hp-current {
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    .hp-max {
+      font-size: 16px;
+      color: var(--ink-soft);
+    }
+
+    .hp-leaves {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .leaf {
+      width: 14px;
+      height: 16px;
+      transition: fill .25s ease, opacity .25s ease;
+    }
+
+    /* Currency tracker */
+    .money-block {
+      padding: 10px;
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg,
+          rgba(212, 175, 55, .08),
+          transparent);
+      text-align: center;
+    }
+
+    .money-total {
+      margin-top: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .04em;
+      color: var(--ink-soft);
+    }
+
+    .money-row {
+      display: grid;
+      grid-template-columns: 30px 1fr 30px;
+      align-items: center;
+      gap: 10px;
+      margin: 7px auto;
+      max-width: 260px;
+    }
+
+    .money-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .money-control {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .money-btn-o {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--gold-soft);
+      background: var(--panel);
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .12s ease, background .12s ease;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .money-btn-o:hover {
+      background: var(--gold-soft);
+      color: var(--panel);
+      transform: translateY(-1px);
+    }
+
+    .money-btn-o:active {
+      transform: translateY(0) scale(.94);
+    }
+
+    .money-btn-p {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--silver-soft);
+      background: var(--panel);
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .12s ease, background .12s ease;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .money-btn-p:hover {
+      background: var(--silver-soft);
+      color: var(--panel);
+      transform: translateY(-1px);
+    }
+
+    .money-btn-p:active {
+      transform: translateY(0) scale(.94);
+    }
+
+    .money-btn-c {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--copper-soft);
+      background: var(--panel);
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .12s ease, background .12s ease;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .money-btn-c:hover {
+      background: var(--copper-soft);
+      color: var(--panel);
+      transform: translateY(-1px);
+    }
+
+    .money-btn-c:active {
+      transform: translateY(0) scale(.94);
+    }
+
+    .money-display {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 7px;
+      min-width: 100px;
+    }
+
+    .money-current {
+      font-family: 'Cinzel', serif;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .money-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink-soft);
+    }
+
+    .money-help {
+      margin-top: 9px;
+      font-size: 12px;
+      font-style: italic;
+      color: var(--ink-soft);
+    }
+
+    .coin-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-width: 320px;
+      margin: 12px auto 0;
+    }
+
+    .coin-pill {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 20px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .coin-svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .coin-gold {
+      color: #d4af37;
+    }
+
+    .coin-silver {
+      color: #c0c0c0;
+    }
+
+    .coin-copper {
+      color: #b87333;
+    }
+
+    /* Equipment */
+    ul.eq {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    ul.eq li {
+      margin-bottom: 4px;
+      font-size: 14.5px;
+    }
+
+    /* Ammo tracker */
+    .ammo-block {
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    .ammo-numbers {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .ammo-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2px solid var(--velvet);
+      background: var(--panel);
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .12s ease, background .12s ease;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .ammo-btn:hover {
+      background: var(--velvet);
+      color: var(--panel);
+      transform: translateY(-1px);
+    }
+
+    .ammo-btn:active {
+      transform: translateY(0px) scale(.94);
+    }
+
+    .ammo-current {
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    .ammo-max {
+      font-size: 16px;
+      color: var(--ink-soft);
+    }
+
+    .ammo-arrows {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .arrow {
+      width: 24;
+      height: 24px;
+      transition: fill .25s ease, opacity .25s ease;
+    }
+
+    /* ======================
+      MÓVIL
+      ====================== */
+
+    @media (max-width: 768px) {
+
+      .sheet {
+        padding: 16px 12px 32px;
+      }
+
+      .wrap {
+        width: 100%;
+      }
+
+      .name {
+        font-size: 34px;
+      }
+
+      .subtitle {
+        font-size: 18px;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .card-title {
+        font-size: 15px;
+      }
+
+      /* HP */
+
+      .hp-current {
+        font-size: 42px;
+      }
+
+      .hp-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
+      }
+
+      .leaf {
+        width: 20px;
+        height: 22px;
+      }
+
+      /* Dinero */
+
+      .coin-pill {
+        font-size: 16px;
+        padding: 10px 12px;
+      }
+
+      .coin-svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      .money-btn-o,
+      .money-btn-p,
+      .money-btn-c {
+        width: 36px;
+        height: 36px;
+        font-size: 22px;
+      }
+
+      .money-total {
+        font-size: 14px;
+      }
+
+      /* Munición */
+
+      .ammo-current {
+        font-size: 42px;
+      }
+
+      .ammo-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
+      }
+
+      .arrow {
+        width: 28px;
+        height: 28px;
+      }
+
+    }
+
+    .combat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .edit-btn {
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .edit-btn:hover {
+      transform: rotate(25deg);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .7);
+
+      display: none;
+
+      justify-content: center;
+      align-items: center;
+
+      z-index: 999;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      width: min(90%, 400px);
+
+      background: var(--panel);
+
+      border-radius: 10px;
+
+      padding: 20px;
+
+      display: flex;
+      flex-direction: column;
+
+      gap: 12px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-content input {
+      width: 100%;
+
+      margin-top: 5px;
+
+      padding: 8px;
+
+      border: 1px solid var(--line);
+
+      border-radius: 4px;
+    }
+
+    #saveCharacter {
+      padding: 10px;
+
+      background: var(--moss);
+
+      color: white;
+
+      border: none;
+
+      border-radius: 6px;
+
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sheet">
+    <div class="wrap">
+
+      <div class="header">
+        <div class="eyebrow">D&D 5E (2014)</div>
+        <div class="name" id="campaignName">
+          La Jaula de Mogok
+        </div>
+
+        <div class="subtitle" id="characterName">
+          Torbin Buscarrunas
+        </div>
+        <div class="divider"></div>
+        <svg class="leafmark" width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M4 19a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v-12a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12z M6 17h14" fill="#c9a227"
+            opacity="0.85" />
+          <path d="M12 4v18" stroke="#121d15" stroke-width="1" />
+        </svg>
+      </div>
+
+      <div class="grid">
+        <div>
+          <div class="card">
+            <div class="card-title combat-header">
+              <span>Combate</span>
+
+              <button id="editCharacterBtn" class="edit-btn">
+                ⚙️
+              </button>
+            </div>
+            <!-- HP -->
+            <div class="hp-block">
+              <div class="lbl"
+                style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--ink-soft);text-transform:uppercase;">
+                Puntos de Golpe
+              </div>
+              <div class="hp-leaves" id="hpLeaves"></div>
+
+              <div class="hp-numbers">
+                <button class="hp-btn" id="hpMinus">−</button>
+                <div><span class="hp-current" id="hpCurrent">8</span>
+                  <span class="hp-max">
+                    /
+                    <span id="hpMaxDisplay"></span>
+                  </span>
+                </div>
+                <button class="hp-btn" id="hpPlus">+</button>
+              </div>
+            </div>
+
+            <div class="abilities">
+              <div class="ability">
+                <div class="lbl">CA</div>
+                <div class="score" id="acDisplay">12</div>
+              </div>
+              <div class="ability">
+                <div class="lbl">Iniciativa</div>
+                <div class="score" id="initiativeDisplay">+2</div>
+              </div>
+              <div class="ability">
+                <div class="lbl">Velocidad (pies)</div>
+                <div class="score" id="speedDisplay">25</div>
+              </div>
+              <div class="ability">
+                <div class="lbl">Bonif. Ataque Conjuros</div>
+                <div class="score" id="attackDisplay">+5</div>
+              </div>
+              <div class="ability">
+                <div class="lbl">Daño Primario</div>
+                <div class="score" id="weapon1Display">1d6</div>
+              </div>
+              <div class="ability">
+                <div class="lbl">Daño Secundario</div>
+                <div class="score" id="weapon2Display">1d4+2</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-title treasure">Tesoro</div>
+            <!-- DINERO -->
+            <div class="money-block">
+              <div class="coin-summary" id="coinSummary"></div>
+              <div class="money-controls">
+
+                <div class="money-control">
+                  <button class="money-btn-o" id="poMinus">−</button>
+                  <button class="money-btn-o" id="poPlus">+</button>
+                </div>
+
+                <div class="money-control">
+                  <button class="money-btn-p" id="ppMinus">−</button>
+                  <button class="money-btn-p" id="ppPlus">+</button>
+                </div>
+
+                <div class="money-control">
+                  <button class="money-btn-c" id="pcMinus">−</button>
+                  <button class="money-btn-c" id="pcPlus">+</button>
+                </div>
+
+              </div>
+
+              <div class="money-total" id="moneyTotal">Total: 1.000 PC</div>
+              <div class="money-help">1 PO = 10 PP · 1 PP = 10 PC</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+
+            <div class="card-title">
+              Munición
+            </div>
+
+            <div class="ammo-block">
+
+              <div class="lbl" style="
+                font-family:'JetBrains Mono',monospace;
+                font-size:10px;
+                letter-spacing:.1em;
+                color:var(--ink-soft);
+                text-transform:uppercase;
+              ">
+                Flechas / Saetas
+              </div>
+
+              <div class="ammo-arrows" id="ammoArrow"></div>
+
+              <div class="ammo-numbers">
+                <button class="ammo-btn" id="ammoMinus">−</button>
+
+                <div>
+                  <span class="ammo-current" id="ammoCurrent">0</span>
+                </div>
+
+                <button class="ammo-btn" id="ammoPlus">+</button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <!-- MODAL -->
+      <div id="editModal" class="modal">
+
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <h3>Editar personaje</h3>
+
+            <button id="closeModal">
+              ✕
+            </button>
+          </div>
+
+          <label>
+            Campaña
+            <input id="campaignInput">
+          </label>
+
+          <label>
+            Nombre Personaje
+            <input id="charNameInput">
+          </label>
+
+          <label>
+            HP Máximo
+            <input id="hpMaxInput" type="number">
+          </label>
+
+          <label>
+            CA
+            <input id="acInput" type="number">
+          </label>
+
+          <label>
+            Iniciativa
+            <input id="initInput">
+          </label>
+
+          <label>
+            Velocidad
+            <input id="speedInput">
+          </label>
+
+          <label>
+            Bonif. Ataque
+            <input id="attackInput">
+          </label>
+
+          <label>
+            Daño Principal
+            <input id="damageInput">
+          </label>
+
+          <label>
+            Daño Secundario
+            <input id="damage2Input">
+          </label>
+
+          <button id="saveCharacter">
+            Guardar
+          </button>
+
+        </div>
+
+      </div>
+
+      <script>
+        let character = {
+          campaign: "La Jaula de Mogok",
+
+          name: "Torbin Buscarrunas",
+
+          hpCurrent: 8,
+          hpMax: 8,
+
+          ammoCurrent: 20,
+          ammoMax: 20,
+
+          moneyCopper: 1000,
+
+          ac: 12,
+          initiative: "+2",
+
+          speed: "25",
+          attackBonus: "+5",
+
+          weapon1: "1d6",
+          weapon2: "1d4 +2"
+        };
+
+        function saveCharacter() {
+
+          localStorage.setItem(
+            'mainCharacter',
+            JSON.stringify(character)
+          );
+
+        }
+
+        function loadCharacter() {
+
+          const saved =
+            localStorage.getItem('mainCharacter');
+
+          if (saved) {
+
+            try {
+
+              character =
+                JSON.parse(saved);
+
+            } catch (error) {
+
+              console.error(
+                'Error cargando personaje',
+                error
+              );
+
+            }
+          }
+        }
+
+        /* =========================
+           PUNTOS DE GOLPE
+           ========================= */
+        const currentEl = document.getElementById('hpCurrent');
+        const leavesEl = document.getElementById('hpLeaves');
+
+        function leafSVG(filled) {
+          const color = filled ? '#1f5a9e' : '#8a7a57';
+          const opacity = filled ? '1' : '0.35';
+
+          return `<svg class="leaf" viewBox="0 0 24 28" style="opacity:${opacity}">
+            <path d="M12 2C7 6 3 12 3 17a9 9 0 0 0 18 0c0-5-4-11-9-15z" fill="${color}"/>
+          </svg>`;
+        }
+
+        function renderLeaves() {
+          leavesEl.innerHTML = '';
+          currentEl.textContent = character.hpCurrent;
+          document
+            .getElementById('hpMaxDisplay')
+            .textContent =
+            character.hpMax;
+          for (let i = 1; i <= character.hpMax; i++) {
+            leavesEl.innerHTML += leafSVG(i <= character.hpCurrent);
+          }
+        }
+
+        function updateHP(delta) {
+
+          character.hpCurrent = Math.max(
+            0,
+            Math.min(
+              character.hpMax,
+              character.hpCurrent + delta
+            )
+          );
+
+          saveCharacter();
+
+          renderLeaves();
+        }
+
+        document.getElementById('hpPlus').addEventListener('click', () => updateHP(1));
+        document.getElementById('hpMinus').addEventListener('click', () => updateHP(-1));
+
+
+        /* =========================
+           DINERO
+
+           Internamente TODO se guarda
+           en monedas de cobre (PC).
+
+           1 PO = 100 PC
+           1 PP = 10 PC
+           1 PC = 1 PC
+           ========================= */
+
+        const COPPER_PER_PP = 10;
+        const COPPER_PER_PO = 100;
+
+        const moneyTotalEl = document.getElementById('moneyTotal');
+        const coinSummaryEl = document.getElementById('coinSummary');
+
+        function formatNumber(number) {
+          return number.toLocaleString('es-CL');
+        }
+
+        /*
+         * Convierte el total de cobre a PO, PP y PC.
+         *
+         * Ejemplo:
+         * 1234 PC
+         * = 12 PO + 3 PP + 4 PC
+         */
+        function getCoinsFromCopper(copper) {
+          const po = Math.floor(copper / COPPER_PER_PO);
+          const remainingAfterGold = copper % COPPER_PER_PO;
+
+          const pp = Math.floor(remainingAfterGold / COPPER_PER_PP);
+          const pc = remainingAfterGold % COPPER_PER_PP;
+
+          return {po, pp, pc};
+        }
+
+        function renderMoney() {
+          const {po, pp, pc} =
+            getCoinsFromCopper(character.moneyCopper);
+          moneyTotalEl.textContent =
+            `Total: ${formatNumber(character.moneyCopper)} PC`;
+
+          coinSummaryEl.innerHTML = `
+            <div class="coin-pill">
+              ${coinSVG('gold')}
+              <span>${po} PO</span>
+            </div>
+
+            <div class="coin-pill">
+              ${coinSVG('silver')}
+              <span>${pp} PP</span>
+            </div>
+
+            <div class="coin-pill">
+              ${coinSVG('copper')}
+              <span>${pc} PC</span>
+            </div>
+          `;
+        }
+
+        /*
+         * Cambia el dinero.
+         *
+         * Los botones no modifican PO/PP/PC directamente.
+         * Modifican el equivalente en cobre.
+         *
+         * PO -> ±100 PC
+         * PP -> ±10 PC
+         * PC -> ±1 PC
+         */
+        function updateMoney(deltaCopper) {
+
+          character.moneyCopper =
+            Math.max(
+              0,
+              character.moneyCopper + deltaCopper
+            );
+
+          saveCharacter();
+
+          renderMoney();
+        }
+
+        function coinSVG(type) {
+
+          let color = '#d4af37';
+
+          if (type === 'silver') {
+            color = '#c0c0c0';
+          }
+
+          if (type === 'copper') {
+            color = '#b87333';
+          }
+
+          return `
+    <svg class="coin-svg" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="13"
+        fill="${color}"
+        stroke="#5b4c36"
+        stroke-width="2"/>
+
+      <polygon
+        points="16,7 19,13 26,13 20.5,17.5 22.5,24 16,20.5 9.5,24 11.5,17.5 6,13 13,13"
+        fill="rgba(255,255,255,.35)"/>
+    </svg>
+    `;
+        }
+        // Oro
+        document.getElementById('poPlus').addEventListener('click', () => updateMoney(COPPER_PER_PO));
+        document.getElementById('poMinus').addEventListener('click', () => updateMoney(-COPPER_PER_PO));
+
+        // Plata
+        document.getElementById('ppPlus').addEventListener('click', () => updateMoney(COPPER_PER_PP));
+        document.getElementById('ppMinus').addEventListener('click', () => updateMoney(-COPPER_PER_PP));
+
+        // Cobre
+        document.getElementById('pcPlus').addEventListener('click', () => updateMoney(1));
+        document.getElementById('pcMinus').addEventListener('click', () => updateMoney(-1));
+
+        /* =========================
+           Ammo: Flechas/Saetas
+           ========================= */
+
+        const maxAmmo = 200;
+
+        const currentAm = document.getElementById('ammoCurrent');
+        const arrowEl = document.getElementById('ammoArrow');
+
+        function arrowSVG(filled) {
+          const color = filled ? '#8f0a0a' : '#8a7a57';
+          const opacity = filled ? '1' : '0.35';
+
+          return `
+    <svg class="arrow" viewBox="0 0 32 32" style="opacity:${opacity}">
+      <line x1="8" y1="24" x2="24" y2="8"
+            stroke="${color}"
+            stroke-width="2.5"
+            stroke-linecap="round"/>
+
+      <polygon points="24,8 17,8 24,15"
+              fill="${color}"/>
+
+      <path d="M8 24 L4 20" stroke="${color}" stroke-width="2"/>
+      <path d="M8 24 L12 28" stroke="${color}" stroke-width="2"/>
+    </svg>
+    `;
+        }
+
+        function renderArrows() {
+          arrowEl.innerHTML = '';
+          currentAm.textContent =
+            character.ammoCurrent;
+          for (let i = 1; i <= character.ammoMax; i++) {
+            arrowEl.innerHTML += arrowSVG(i <= character.ammoCurrent);
+          }
+        }
+
+        function updateAMMO(delta) {
+
+          character.ammoCurrent = Math.max(
+            0,
+            Math.min(
+              character.ammoMax,
+              character.ammoCurrent + delta
+            )
+          );
+
+          saveCharacter();
+
+          renderArrows();
+        }
+
+        document.getElementById('ammoPlus').addEventListener('click', () => updateAMMO(1));
+        document.getElementById('ammoMinus').addEventListener('click', () => updateAMMO(-1));
+
+
+        const modal =
+          document.getElementById('editModal');
+
+        document
+          .getElementById('editCharacterBtn')
+          .addEventListener('click', () => {
+
+            document.getElementById('charNameInput')
+              .value = character.name;
+
+            document.getElementById('campaignInput')
+              .value = character.campaign;
+
+            document.getElementById('hpMaxInput')
+              .value = character.hpMax;
+
+            document.getElementById('acInput')
+              .value = character.ac;
+
+            document.getElementById('initInput')
+              .value = character.initiative;
+
+            document.getElementById('speedInput')
+              .value = character.speed;
+
+            document.getElementById('attackInput')
+              .value = character.attackBonus;
+
+            document.getElementById('damageInput')
+              .value = character.weapon1;
+
+            document.getElementById('damage2Input')
+              .value = character.weapon2;
+
+            modal.classList.add('show');
+
+          });
+
+        document
+          .getElementById('closeModal')
+          .addEventListener('click', () => {
+
+            modal.classList.remove('show');
+
+          });
+
+        document
+          .getElementById('saveCharacter')
+          .addEventListener('click', () => {
+
+            character.name =
+              document.getElementById('charNameInput')
+                .value.trim() || "Personaje";
+
+            character.campaign =
+              document.getElementById('campaignInput')
+                .value.trim() || "Campaña";
+
+            character.hpMax =
+              Math.max(
+                1,
+                parseInt(
+                  document.getElementById('hpMaxInput').value
+                ) || 1
+              );
+
+            character.hpCurrent =
+              Math.min(
+                character.hpCurrent,
+                character.hpMax
+              );
+
+            character.ac =
+              parseInt(
+                document.getElementById('acInput').value
+              ) || 10;
+
+            character.initiative =
+              document.getElementById('initInput').value.trim();
+
+            character.speed =
+              document.getElementById('speedInput').value.trim();
+
+            character.attackBonus =
+              document.getElementById('attackInput').value.trim();
+
+            character.weapon1 =
+              document.getElementById('damageInput').value.trim();
+
+            character.weapon2 =
+              document.getElementById('damage2Input').value.trim();
+
+            saveCharacter();
+
+            renderCharacterInfo();
+            renderCombatStats();
+            renderLeaves();
+
+            modal.classList.remove('show');
+
+          });
+
+        function renderCharacterInfo() {
+
+          document.getElementById('characterName')
+            .textContent = character.name;
+
+          document.getElementById('campaignName')
+            .textContent = character.campaign;
+
+          document.title =
+            `${character.name} | ${character.campaign}`;
+
+        }
+
+        function renderCombatStats() {
+
+          document.getElementById('acDisplay')
+            .textContent = character.ac;
+
+          document.getElementById('initiativeDisplay')
+            .textContent = character.initiative;
+
+          document.getElementById('speedDisplay')
+            .textContent = character.speed;
+
+          document.getElementById('attackDisplay')
+            .textContent = character.attackBonus;
+
+          document.getElementById('weapon1Display')
+            .textContent = character.weapon1;
+
+          document.getElementById('weapon2Display')
+            .textContent = character.weapon2;
+
+        }
+
+        loadCharacter();
+
+        renderCharacterInfo();
+        renderCombatStats();
+        renderLeaves();
+        renderMoney();
+        renderArrows();
+
+        if ("serviceWorker" in navigator) {
+
+          window.addEventListener("load", () => {
+
+            navigator.serviceWorker.register("sw.js");
+
+          });
+
+        }
+      </script>
+
+</body>
+
+</html>
